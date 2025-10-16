@@ -1,16 +1,58 @@
-# React + Vite
+# 🧩 Task Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern **Task Management Web App** built using **React 19**, **Vite**, and **TailwindCSS 4**.  
+This app allows users to organize, track, and manage tasks efficiently with a clean and responsive interface.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Features
 
-## React Compiler
+- ⚛️ Built with React 19 and Vite 7  
+- 🎨 Styled using TailwindCSS 4  
+- 🧱 Modern UI components from Ant Design and MUI  
+- 🔄 State management with React Query  
+- 🌐 API integration using Axios  
+- 🔔 Toast and Snackbar notifications  
+- 🪶 Drag and Drop support via DND Kit  
+- 📅 Lightweight date utilities with Day.js  
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🚀 Project Setup (Step-by-Step)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### **Step 1: Clone the Repository**
+Clone the project from GitHub to your local machine.
+```bash
+git clone https://github.com/your-username/task-manager.git
+
+### **Step 2: go to frontend folder**
+cd TaskManager/frontend/
+### **Step 3: Install Dependencies**
+
+Install all required npm packages:
+
+npm install
+
+### **Step 4: Setup Environment Variables**
+
+Create a .env file in the root directory by copying the example file:
+
+cp .env.example .env
+
+
+Then open .env and add/update your environment variables:
+
+        VITE_API_BASE_URL=http://localhost:5000/api/v1
+
+
+
+### **Step 5: Run the Development Server**
+
+Start the development server:
+
+npm run dev
+
+
+Your app will be available at:
+👉 http://localhost:5000
+
