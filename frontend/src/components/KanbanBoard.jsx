@@ -1,24 +1,64 @@
 import React from 'react';
 import { Card, Button, Select, theme } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { 
+  DndContext, 
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  useDraggable,
+  useDroppable
+} from '@dnd-kit/core';
 
 const STATUSES = ['Pending', 'In Progress', 'Completed'];
 
-// Apply the Ant Design v5 theme token
+  // Apply the Ant Design v5 theme token
 const useStyles = () => {
   const { token } = theme.useToken();
   return {
     card: {
       marginBottom: token.marginMD,
       borderRadius: token.borderRadiusLG,
+      boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
     },
     select: {
       width: 120,
+    },
+    dropZone: {
+      transition: 'background-color 0.2s ease',
+      minHeight: '200px',
+      height: '100%',
+      borderRadius: token.borderRadiusLG,
+      padding: token.padding,
+    },
+    dropZoneActive: {
+      backgroundColor: token.colorPrimaryBg,
+      borderColor: token.colorPrimary,
     }
   };
+};const DraggableTaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: task._id,
+    data: { task }
+  });
+
+  return (
+    <div ref={setNodeRef} {...listeners} {...attributes}>
+      <TaskCard
+        task={task}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onStatusChange={onStatusChange}
+        isDragging={isDragging}
+      />
+    </div>
+  );
 };
 
-const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
+const TaskCard = ({ task, onEdit, onDelete, onStatusChange, isDragging }) => {
   const styles = useStyles();
   
   // Status color mapping
@@ -32,6 +72,10 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
     ...styles.card,
     backgroundColor: statusColors[task.status]?.bg || styles.card.backgroundColor,
     borderColor: statusColors[task.status]?.borderColor || styles.card.borderColor,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: 'move',
+    transform: isDragging ? 'scale(1.05)' : 'scale(1)',
+    transition: 'transform 0.2s, opacity 0.2s',
   };
 
   return (
@@ -80,21 +124,92 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
   );
 };
 
+const StatusColumn = ({ status, children }) => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: status,
+  });
+
+  const styles = useStyles();
+  
+  return (
+    <div 
+      ref={setNodeRef}
+      className="bg-gray-50 p-4 rounded-lg"
+      style={{
+        ...styles.dropZone,
+        ...(isOver ? styles.dropZoneActive : {}),
+      }}
+    >
+      <h3 className="text-lg font-semibold mb-4">{status}</h3>
+      <div className="min-h-[100px]">
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const KanbanBoard = ({ tasks, onTaskMove, onEditTask, onDeleteTask }) => {
+  const [activeId, setActiveId] = React.useState(null);
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: (event) => {
+        return event.code === 'Space' || event.code === 'Enter'
+          ? event.preventDefault()
+          : undefined;
+      },
+    })
+  );
+
   const getTasksByStatus = (status) => {
     return tasks.filter(task => task.status === status);
   };
 
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const task = tasks.find(t => t._id === active.id);
+      const newStatus = over.id;
+      
+      if (task && STATUSES.includes(newStatus) && task.status !== newStatus) {
+        onTaskMove(task._id, newStatus);
+      }
+    }
+    
+    setActiveId(null);
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+  };
+
+  const activeTask = activeId ? tasks.find(task => task._id === activeId) : null;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {STATUSES.map((status) => {
-        const statusTasks = getTasksByStatus(status);
-        return (
-          <div key={status} className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">{status}</h3>
-            <div className="min-h-[100px]">
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {STATUSES.map((status) => {
+          const statusTasks = getTasksByStatus(status);
+          return (
+            <StatusColumn key={status} status={status}>
               {statusTasks.map((task) => (
-                <TaskCard
+                <DraggableTaskCard
                   key={task._id}
                   task={task}
                   onEdit={onEditTask}
@@ -102,11 +217,22 @@ const KanbanBoard = ({ tasks, onTaskMove, onEditTask, onDeleteTask }) => {
                   onStatusChange={onTaskMove}
                 />
               ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+            </StatusColumn>
+          );
+        })}
+      </div>
+      <DragOverlay>
+        {activeTask ? (
+          <TaskCard
+            task={activeTask}
+            onEdit={onEditTask}
+            onDelete={onDeleteTask}
+            onStatusChange={onTaskMove}
+            isDragging={true}
+          />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 
