@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button, Form, Spin, Empty, Table, Switch, Tag, Space, Tooltip } from "antd";
 import { 
   PlusOutlined, 
@@ -8,19 +8,20 @@ import {
   DeleteOutlined 
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
-import { useAuth } from "../context/AuthContext";
 import { useSnackbarContext } from "../context/SnackbarContext";
-import taskService from "../services/taskService";
 import TaskForm from "../components/TaskForm";
 import KanbanBoard from "../components/KanbanBoard";
+import { useTasks } from "../hooks/useTasks";
 
 const TaskPage = () => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [isKanbanView, setIsKanbanView] = useState(true);
+  const [filteredInfo, setFilteredInfo] = useState({});
+  const [sortedInfo, setSortedInfo] = useState({});
   const [form] = Form.useForm();
+
+  const { tasks, isLoading, createTask, updateTask, deleteTask } = useTasks();
 
   // Status color mapping
   const statusColors = {
@@ -35,6 +36,10 @@ const TaskPage = () => {
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
+      sorter: (a, b) => a.title.localeCompare(b.title),
+      filterSearch: true,
+      onFilter: (value, record) => record.title.toLowerCase().includes(value.toLowerCase()),
+      filteredValue: null,
       render: (text, record) => (
         <div className="font-medium">{text}</div>
       ),
@@ -44,6 +49,7 @@ const TaskPage = () => {
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
+      sorter: (a, b) => a.description.localeCompare(b.description),
       render: (text) => (
         <Tooltip title={text}>
           <span>{text}</span>
@@ -54,6 +60,21 @@ const TaskPage = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      filters: [
+        { text: 'Pending', value: 'Pending' },
+        { text: 'In Progress', value: 'In Progress' },
+        { text: 'Completed', value: 'Completed' },
+      ],
+      filterMode: 'menu',
+      filtered: true,
+      onFilter: (value, record) => {
+        if (!record.status) return false;
+        return record.status.toString() === value.toString();
+      },
+      sorter: (a, b) => {
+        if (!a.status || !b.status) return 0;
+        return a.status.localeCompare(b.status);
+      },
       render: (status) => (
         <Tag
           style={{
@@ -71,6 +92,8 @@ const TaskPage = () => {
       title: 'Due Date',
       dataIndex: 'dueDate',
       key: 'dueDate',
+      sorter: (a, b) => new Date(a.dueDate) - new Date(b.dueDate),
+      defaultSortOrder: 'ascend',
       render: (date) => new Date(date).toLocaleDateString(),
     },
     {
@@ -93,30 +116,6 @@ const TaskPage = () => {
       ),
     },
   ];
-  const { token } = useAuth();
-  const { openSnackBar } = useSnackbarContext();
-
-  // Fetch tasks on component mount
-  useEffect(() => {
-    fetchTasks();
-  }, [token]);
-
-  const fetchTasks = async () => {
-    try {
-      setLoading(true);
-      const response = await taskService.getAllTasks(token);
-      setTasks(response.data.tasks || []);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-      openSnackBar(
-        "error",
-        error.response?.data?.message || "Failed to fetch tasks"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCreateTask = () => {
     setEditingTask(null);
     form.resetFields();
@@ -132,65 +131,22 @@ const TaskPage = () => {
     setModalVisible(true);
   };
 
-  const handleTaskMove = async (taskId, newStatus) => {
-    try {
-      await taskService.updateTask(taskId, { status: newStatus }, token);
-      // Optimistically update the UI
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task._id === taskId ? { ...task, status: newStatus } : task
-        )
-      );
-      openSnackBar("success", "Task status updated successfully");
-    } catch (error) {
-      console.error("Error updating task:", error);
-      openSnackBar(
-        "error",
-        error.response?.data?.message || "Failed to update task"
-      );
-      // Refresh tasks to ensure UI is in sync with server
-      fetchTasks();
-    }
+  const handleTaskMove = (taskId, newStatus) => {
+    updateTask({ taskId, taskData: { status: newStatus } });
   };
 
-  const handleDeleteTask = async (taskId) => {
-    try {
-      await taskService.deleteTask(taskId, token);
-      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
-      openSnackBar("success", "Task deleted successfully");
-    } catch (error) {
-      console.error("Error deleting task:", error);
-      openSnackBar(
-        "error",
-        error.response?.data?.message || "Failed to delete task"
-      );
-    }
+  const handleDeleteTask = (taskId) => {
+    deleteTask(taskId);
   };
 
-  const handleFormSubmit = async (values) => {
-    try {
-      if (editingTask) {
-        await taskService.updateTask(editingTask._id, values, token);
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task._id === editingTask._id ? { ...task, ...values } : task
-          )
-        );
-        openSnackBar("success", "Task updated successfully");
-      } else {
-        const response = await taskService.createTask(values, token);
-        setTasks((prevTasks) => [...prevTasks, response.data.task]);
-        openSnackBar("success", "Task created successfully");
-      }
-      setModalVisible(false);
-      form.resetFields();
-    } catch (error) {
-      console.error("Error saving task:", error);
-      openSnackBar(
-        "error",
-        error.response?.data?.message || "Failed to save task"
-      );
+  const handleFormSubmit = (values) => {
+    if (editingTask) {
+      updateTask({ taskId: editingTask._id, taskData: values });
+    } else {
+      createTask(values);
     }
+    setModalVisible(false);
+    form.resetFields();
   };
 
   return (
@@ -230,7 +186,7 @@ const TaskPage = () => {
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Spin size="large" />
         </div>
@@ -248,6 +204,14 @@ const TaskPage = () => {
         />
       ) : (
         <div className="bg-white rounded-lg shadow">
+          <div className="p-4 border-b flex justify-end space-x-4">
+            <Button onClick={() => {
+              setFilteredInfo({});
+              setSortedInfo({});
+            }}>
+              Clear filters and sorters
+            </Button>
+          </div>
           <Table
             dataSource={tasks}
             columns={columns}
@@ -258,7 +222,16 @@ const TaskPage = () => {
               showSizeChanger: true,
               showTotal: (total) => `Total ${total} tasks`
             }}
+            onChange={(pagination, filters, sorter, extra) => {
+              setFilteredInfo(filters);
+              setSortedInfo(sorter);
+              console.log('Table changed:', { pagination, filters, sorter, extra });
+            }}
+            filteredInfo={filteredInfo}
+            sortedInfo={sortedInfo}
             className="rounded-lg overflow-hidden"
+            scroll={{ x: 'max-content' }}
+            sticky
           />
         </div>
       )}

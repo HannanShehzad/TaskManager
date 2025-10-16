@@ -8,48 +8,20 @@ import {
   PlusCircleOutlined,
   LoadingOutlined
 } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
-import taskService from "../services/taskService";
+import { useTasks } from "../hooks/useTasks";
 
 const { Title, Paragraph } = Typography;
 
 const HomePage = () => {
-  const { isAuthenticated, user, token } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const [taskStats, setTaskStats] = useState({
-    total: 0,
-    completed: 0,
-    inProgress: 0,
-    pending: 0
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      fetchTaskStats();
-    }
-  }, [isAuthenticated, token]);
-
-  const fetchTaskStats = async () => {
-    try {
-      setLoading(true);
-      const response = await taskService.getAllTasks(token);
-      const tasks = response.data.tasks || [];
-      
-      // Calculate stats
-      const stats = {
-        total: tasks.length,
-        completed: tasks.filter(task => task.status === 'Completed').length,
-        inProgress: tasks.filter(task => task.status === 'In Progress').length,
-        pending: tasks.filter(task => task.status === 'Pending').length
-      };
-      
-      setTaskStats(stats);
-    } catch (error) {
-      console.error('Error fetching task stats:', error);
-    } finally {
-      setLoading(false);
-    }
+  const { tasks, isLoading } = useTasks();
+  
+  const taskStats = {
+    total: tasks.length,
+    completed: tasks.filter(task => task.status === 'Completed').length,
+    inProgress: tasks.filter(task => task.status === 'In Progress').length,
+    pending: tasks.filter(task => task.status === 'Pending').length
   };
 
   const features = [
@@ -105,7 +77,7 @@ const HomePage = () => {
             {/* Welcome Section */}
             <div className="text-center mb-12">
               <Title level={1} className="mb-4">
-                Welcome back, {user?.fullName || 'User'}!
+                Welcome back, {user?.name || 'User'}!
               </Title>
               <Paragraph className="text-lg text-gray-600 mb-8">
                 Ready to be productive today? Let's manage your tasks efficiently.
@@ -127,7 +99,7 @@ const HomePage = () => {
                 <Col xs={12} sm={6} key={index}>
                   <Card 
                     className="text-center hover:shadow-lg transition-shadow"
-                    loading={loading}
+                    loading={isLoading}
                   >
                     <Statistic
                       title={
@@ -138,7 +110,7 @@ const HomePage = () => {
                       }
                       value={stat.value}
                       valueStyle={{ color: stat.color }}
-                      prefix={loading ? <LoadingOutlined /> : null}
+                      prefix={isLoading ? <LoadingOutlined /> : null}
                     />
                   </Card>
                 </Col>
