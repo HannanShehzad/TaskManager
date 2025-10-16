@@ -1,18 +1,34 @@
 import React from 'react';
-import { Card, Button, Select } from 'antd';
+import { Card, Button, Select, theme } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const STATUSES = ['Pending', 'In Progress', 'Completed'];
 
+// Apply the Ant Design v5 theme token
+const useStyles = () => {
+  const { token } = theme.useToken();
+  return {
+    card: {
+      marginBottom: token.marginMD,
+      borderRadius: token.borderRadiusLG,
+    },
+    select: {
+      width: 120,
+    }
+  };
+};
+
 const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
+  const styles = useStyles();
   return (
     <Card
-      className="mb-3"
+      style={styles.card}
       extra={
         <Select
           value={task.status}
           onChange={(value) => onStatusChange(task._id, value)}
-          style={{ width: 120 }}
+          style={styles.select}
+          size="middle"
         >
           {STATUSES.map(status => (
             <Select.Option key={status} value={status}>

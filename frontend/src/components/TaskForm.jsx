@@ -1,14 +1,19 @@
 import React from 'react';
-import { Modal, Form, Input, DatePicker, Select } from 'antd';
+import { Modal, Form, Input, DatePicker, Select, theme } from 'antd';
 import dayjs from 'dayjs';
 
 const TaskForm = ({ visible, onCancel, onFinish, editingTask, form }) => {
+  const { token } = theme.useToken();
+
   return (
     <Modal
       title={editingTask ? 'Edit Task' : 'Create Task'}
       open={visible}
       onCancel={onCancel}
       onOk={() => form.submit()}
+      style={{ 
+        ['--ant-primary-color']: token.colorPrimary 
+      }}
     >
       <Form
         form={form}

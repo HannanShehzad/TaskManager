@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ConfigProvider, theme } from 'antd';
 import './App.css';
 import HomeLayout from './layout/HomeLayout';
 import HomePage from './screens/HomePage';
@@ -13,8 +14,17 @@ import TaskPage from './screens/TaskPage';
 
 function App() {
   return (
-    <SnackbarProviderWrapper>
-      <Router>
+    <ConfigProvider
+      theme={{
+        algorithm: theme.defaultAlgorithm,
+        token: {
+          colorPrimary: '#6366f1', // Indigo-600 to match your existing color scheme
+          borderRadius: 8,
+        },
+      }}
+    >
+      <SnackbarProviderWrapper>
+        <Router>
         <Routes>
           {/* Protected Routes */}
           <Route element={
@@ -42,6 +52,7 @@ function App() {
         </Routes>
       </Router>
     </SnackbarProviderWrapper>
+  </ConfigProvider>
   );
 }
 
