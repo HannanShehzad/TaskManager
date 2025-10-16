@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, User, Settings, Menu } from "lucide-react";
-import logo from "../assets/logo.png";
+import { Home, User, Settings, Menu, CheckSquare } from "lucide-react";
 import { useStyleContext } from "../context/StyleContext";
 const items = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/tasks", label: "Tasks", icon: Menu },
-  { to: "/profile", label: "Profile", icon: User },
-  { to: "/settings", label: "Settings", icon: Settings },
+
 ];
 
 const Sidebar = () => {
@@ -34,12 +32,16 @@ const Sidebar = () => {
       }`}
       aria-hidden={!expanded && isMobile}
     >
-      <div className="flex items-center justify-between p-4 h-18   bg-white  text-white ">
-        <div className="flex items-center space-x-2">
-          {/* show title when expanded and not mobile-only icons */}
-          {expanded && !isMobile && <span className="font-semibold"> </span>}
+      <div className="flex items-center p-4 h-18 bg-white border-b border-gray-300">
+ 
+        <div className="flex items-center ml-2">
+          <CheckSquare size={24} className="text-indigo-600" />
+          {expanded && !isMobile && (
+            <span className="ml-2 font-semibold text-gray-800 text-lg">
+              TaskMaster
+            </span>
+          )}
         </div>
-        <img src={logo} />
       </div>
 
       <nav className="flex-1 overflow-y-auto mt-2">

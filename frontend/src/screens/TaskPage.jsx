@@ -195,8 +195,24 @@ const TaskPage = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
+        <div></div>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleCreateTask}
+          className="bg-indigo-600 hover:bg-indigo-700"
+        >
+          Add Task
+        </Button>
+      </div>
+      <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold text-gray-800">Task Management</h1>
+          
+        </div>
+        <div
+         
+        >
           <div className="flex items-center space-x-2 bg-white px-3 py-1 rounded-lg shadow-sm">
             <BarsOutlined 
               className={!isKanbanView ? 'text-indigo-600' : 'text-gray-400'} 
@@ -211,14 +227,6 @@ const TaskPage = () => {
             />
           </div>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleCreateTask}
-          className="bg-indigo-600 hover:bg-indigo-700"
-        >
-          Add Task
-        </Button>
       </div>
 
       {loading ? (

@@ -1,7 +1,6 @@
 
 import { Link, useNavigation  } from 'react-router-dom';
 import { Home, LogIn, Menu, UserPlus, } from 'lucide-react';
-import logo from '../assets/logo.png'
 import { useStyleContext } from '../context/StyleContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -36,10 +35,7 @@ const Header = () => {
               <LogIn size={18} />
               <span>Logout</span>
             </span>
-            <Link to="/signup" className="flex items-center space-x-1 hover:text-indigo-200 transition">
-              <UserPlus size={18} />
-              <span>Sign Up</span>
-            </Link>
+           
           </nav>
         </div>
       </div>

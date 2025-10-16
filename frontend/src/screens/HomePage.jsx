@@ -1,18 +1,56 @@
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Row, Col, Statistic, Typography } from 'antd';
+import { Button, Card, Row, Col, Statistic, Typography, Spin } from 'antd';
 import { 
   ClockCircleOutlined, 
   CheckCircleOutlined, 
   RightCircleOutlined,
-  PlusCircleOutlined
+  PlusCircleOutlined,
+  LoadingOutlined
 } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import taskService from "../services/taskService";
 
 const { Title, Paragraph } = Typography;
 
 const HomePage = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, token } = useAuth();
   const navigate = useNavigate();
+  const [taskStats, setTaskStats] = useState({
+    total: 0,
+    completed: 0,
+    inProgress: 0,
+    pending: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchTaskStats();
+    }
+  }, [isAuthenticated, token]);
+
+  const fetchTaskStats = async () => {
+    try {
+      setLoading(true);
+      const response = await taskService.getAllTasks(token);
+      const tasks = response.data.tasks || [];
+      
+      // Calculate stats
+      const stats = {
+        total: tasks.length,
+        completed: tasks.filter(task => task.status === 'Completed').length,
+        inProgress: tasks.filter(task => task.status === 'In Progress').length,
+        pending: tasks.filter(task => task.status === 'Pending').length
+      };
+      
+      setTaskStats(stats);
+    } catch (error) {
+      console.error('Error fetching task stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const features = [
     {
@@ -32,12 +70,31 @@ const HomePage = () => {
     }
   ];
 
-  // Example statistics - you can replace these with real data from your backend
   const stats = [
-    { title: 'Total Tasks', value: '12' },
-    { title: 'Completed', value: '5' },
-    { title: 'In Progress', value: '4' },
-    { title: 'Pending', value: '3' }
+    { 
+      title: 'Total Tasks',
+      value: taskStats.total,
+      icon: <RightCircleOutlined style={{ fontSize: '20px' }} />,
+      color: '#6366f1'  // Indigo
+    },
+    { 
+      title: 'Completed',
+      value: taskStats.completed,
+      icon: <CheckCircleOutlined style={{ fontSize: '20px' }} />,
+      color: '#389E0D'  // Green
+    },
+    { 
+      title: 'In Progress',
+      value: taskStats.inProgress,
+      icon: <ClockCircleOutlined style={{ fontSize: '20px' }} />,
+      color: '#0958D9'  // Blue
+    },
+    { 
+      title: 'Pending',
+      value: taskStats.pending,
+      icon: <ClockCircleOutlined style={{ fontSize: '20px' }} />,
+      color: '#D46B08'  // Orange
+    }
   ];
 
   return (
@@ -68,11 +125,20 @@ const HomePage = () => {
             <Row gutter={[16, 16]} className="mb-12">
               {stats.map((stat, index) => (
                 <Col xs={12} sm={6} key={index}>
-                  <Card className="text-center hover:shadow-lg transition-shadow">
+                  <Card 
+                    className="text-center hover:shadow-lg transition-shadow"
+                    loading={loading}
+                  >
                     <Statistic
-                      title={stat.title}
+                      title={
+                        <span className="flex items-center justify-center gap-2">
+                          {stat.icon}
+                          {stat.title}
+                        </span>
+                      }
                       value={stat.value}
-                      valueStyle={{ color: '#6366f1' }}
+                      valueStyle={{ color: stat.color }}
+                      prefix={loading ? <LoadingOutlined /> : null}
                     />
                   </Card>
                 </Col>
