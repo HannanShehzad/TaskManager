@@ -130,17 +130,7 @@ const LoginPage = () => {
           </p>
         </div>
 
-        <div className="mt-6">
-          <Link to="/">
-            <Button
-              fullWidth
-              variant="outlined"
-              className="border-gray-300 text-gray-700"
-            >
-              Back to Home
-            </Button>
-          </Link>
-        </div>
+      
       </div>
     </div>
   );
