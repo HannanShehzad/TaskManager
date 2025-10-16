@@ -1,0 +1,51 @@
+{
+    "status": "success",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzYwNTI2MjIyLCJleHAiOjE3NjgzMDIyMjJ9.mnGEJamhgmRk47WBi3lKR3DgVpd3-jJ6tc463cqmd0M",
+    "data": {
+        "client": {
+            "id": 2,
+            "fullName": "hannan",
+            "email": "hannan@gmail.com",
+            "isVerified": true,
+            "verificationPoints": 110,
+            "passport": {
+                "type": "Buffer",
+                "data": [
+                    137,
+                    80
+              
+                ]
+            },
+            "passportMimeType": "image/png",
+            "passportPoints": 70,
+            "driverLicense": {
+                "type": "Buffer",
+                "data": [
+                    137,
+                    80,
+                    78
+                  
+                ]
+            },
+            "driverLicenseMimeType": "image/png",
+            "driverLicensePoints": 40,
+            "birthCertificate": null,
+            "birthCertificateMimeType": null,
+            "birthCertificatePoints": 0,
+            "medicareCard": null,
+            "medicareCardMimeType": null,
+            "medicareCardPoints": 0,
+            "bankStatement": null,
+            "bankStatementMimeType": null,
+            "bankStatementPoints": 0,
+            "utilityBill": null,
+            "utilityBillMimeType": null,
+            "utilityBillPoints": 0,
+            "medicalCertificate": null,
+            "medicalCertificateMimeType": null,
+            "medicalCertificatePoints": 0,
+            "createdAt": "2025-10-15T08:22:54.000Z",
+            "updatedAt": "2025-10-15T08:22:54.000Z"
+        }
+    }
+}
