@@ -23,7 +23,7 @@ This app allows users to organize, track, and manage tasks efficiently with a cl
 ### **Step 1: Clone the Repository**
 Clone the project from GitHub to your local machine.
 ```bash
-git clone https://github.com/your-username/task-manager.git
+git clone https://github.com/HannanShehzad/TaskManager
 
 ### **Step 2: go to frontend folder**
 cd TaskManager/frontend/

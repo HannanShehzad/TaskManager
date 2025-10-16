@@ -24,7 +24,7 @@ It provides a secure REST API for managing users and tasks, built using **MongoD
 ### **Step 1: Clone the Repository**
 Clone the project from GitHub to your local machine.
 ```bash
-git clone https://github.com/your-username/task-manager.git
+git clone https://github.com/HannanShehzad/TaskManager
 
 ### **Step 2: go to frontend folder**
 cd TaskManager/backend/
