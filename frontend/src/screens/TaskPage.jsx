@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Form, Spin, Empty, Table, Switch, Tag, Space, Tooltip } from "antd";
+import { Button, Form, Spin, Empty, Table, Switch, Tag, Space, Tooltip, Select } from "antd";
 import { 
   PlusOutlined, 
   AppstoreOutlined, 
@@ -60,17 +60,7 @@ const TaskPage = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      filters: [
-        { text: 'Pending', value: 'Pending' },
-        { text: 'In Progress', value: 'In Progress' },
-        { text: 'Completed', value: 'Completed' },
-      ],
-      filterMode: 'menu',
-      filtered: true,
-      onFilter: (value, record) => {
-        if (!record.status) return false;
-        return record.status.toString() === value.toString();
-      },
+      
       sorter: (a, b) => {
         if (!a.status || !b.status) return 0;
         return a.status.localeCompare(b.status);
@@ -204,7 +194,28 @@ const TaskPage = () => {
         />
       ) : (
         <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b flex justify-end space-x-4">
+          <div className="p-4 border-b flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-600">Filter by Status:</span>
+              <Select
+                defaultValue="all"
+                style={{ width: 120 }}
+                onChange={(value) => {
+                  const newFilteredInfo = { ...filteredInfo };
+                  if (value === 'all') {
+                    delete newFilteredInfo.status;
+                  } else {
+                    newFilteredInfo.status = [value];
+                  }
+                  setFilteredInfo(newFilteredInfo);
+                }}
+              >
+                <Select.Option value="all">All</Select.Option>
+                <Select.Option value="Pending">Pending</Select.Option>
+                <Select.Option value="In Progress">In Progress</Select.Option>
+                <Select.Option value="Completed">Completed</Select.Option>
+              </Select>
+            </div>
             <Button onClick={() => {
               setFilteredInfo({});
               setSortedInfo({});
@@ -213,7 +224,12 @@ const TaskPage = () => {
             </Button>
           </div>
           <Table
-            dataSource={tasks}
+            dataSource={tasks.filter(task => {
+              if (filteredInfo.status && filteredInfo.status.length > 0) {
+                return filteredInfo.status.includes(task.status);
+              }
+              return true;
+            })}
             columns={columns}
             rowKey="_id"
             pagination={{ 
