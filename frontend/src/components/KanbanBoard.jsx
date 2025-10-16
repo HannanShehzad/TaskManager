@@ -20,9 +20,23 @@ const useStyles = () => {
 
 const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
   const styles = useStyles();
+  
+  // Status color mapping
+  const statusColors = {
+    'Pending': { bg: '#FFF7E6', borderColor: '#FFD591' },      // Orange theme
+    'In Progress': { bg: '#E6F4FF', borderColor: '#91CAFF' },  // Blue theme
+    'Completed': { bg: '#F6FFED', borderColor: '#B7EB8F' }     // Green theme
+  };
+
+  const cardStyle = {
+    ...styles.card,
+    backgroundColor: statusColors[task.status]?.bg || styles.card.backgroundColor,
+    borderColor: statusColors[task.status]?.borderColor || styles.card.borderColor,
+  };
+
   return (
     <Card
-      style={styles.card}
+      style={cardStyle}
       extra={
         <Select
           value={task.status}

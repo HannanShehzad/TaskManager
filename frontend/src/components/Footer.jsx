@@ -19,7 +19,7 @@ const Footer = () => {
           </div>
           <div>
             <h3 className="text-white font-bold text-lg mb-4">Contact</h3>
-            <p className="text-sm">Email: info@ondemandsecurity.com</p>
+            <p className="text-sm">Email: info@info.com</p>
             <p className="text-sm">Phone: +1 234 567 890</p>
           </div>
         </div>
