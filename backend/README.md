@@ -26,6 +26,10 @@ Clone the project from GitHub to your local machine.
 ```bash
 git clone https://github.com/HannanShehzad/TaskManager
 
+download and install Mongodb community
+
+download and install Mongodb shell
+
 ### **Step 2: go to frontend folder**
 cd TaskManager/backend/
 ### **Step 3: Install Dependencies**
